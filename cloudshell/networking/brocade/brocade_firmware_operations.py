@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import inject
+import re
 
-
+from collections import OrderedDict
 from cloudshell.configuration.cloudshell_cli_binding_keys import CLI_SERVICE
 from cloudshell.configuration.cloudshell_shell_core_binding_keys import LOGGER, CONTEXT, API
 from cloudshell.networking.brocade.brocade_state_operations import BrocadeStateOperations
@@ -67,10 +68,28 @@ class BrocadeFirmwareOperations(FirmwareOperationsInterface):
                     host=connection_dict.get(UrlParser.HOSTNAME),
                     file_path=file_path)
 
-        output = self.cli_service.send_command(command=copy_firmware_command, expected_str=self._default_prompt)
+        expected_map = OrderedDict()
+        expected_map[r"(enter 'y' or 'n')"] = lambda session: session.send_line('y')
 
-        self.cli_service.send_config_command(command="boot system flash secondary", expected_str=self._default_prompt)
-        self.cli_service.exit_configuration_mode()
-        self.state_operations.reload()
-        self.cli_service.send_config_command(command="copy flash flash primary delete-first",
-                                             expected_str=self._default_prompt)
+        output = self.cli_service.send_command(command=copy_firmware_command, expected_map=expected_map)
+        output = self._buffer_readup(output=output)
+
+        if re.search(r"TFTP.*done", output):
+            self.logger.debug("Copy new image to flash secondary successfully")
+            self.logger.debug("Try boot device from secondary flash ...")
+            self.cli_service.send_command(command="boot system flash secondary", expected_str=expected_map)
+            self.state_operations.reload()
+            self.logger.debug("Boot from secondary flash successfully. Copy Secondary to primary ...")
+            self.cli_service.send_command(command="copy flash flash primary delete-first", expected_str=expected_map)
+            return "Update firmware completed successfully"
+        else:
+            matched = re.match(r"TFTP:.*", output)
+            if matched:
+                error = matched.group()
+            else:
+                error = "Error during copy firmware image"
+            raise Exception(self.__class__.__name__, "Load firmware failed with error: {}".format(error))
+
+    def _buffer_readup(self, output):
+        """ Read buffer to end of command execution if prompt returned immediately """
+        return output

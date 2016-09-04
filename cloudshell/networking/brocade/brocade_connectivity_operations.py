@@ -35,18 +35,6 @@ class BrocadeConnectivityOperations(ConnectivityOperations):
     def api(self):
         return self._api or inject.instance(API)
 
-    def send_config_command_list(self, command_list, expected_map=None):
-        """Send list of config commands
-        :param command_list: list of commands
-        :return output from cli
-        :rtype: string
-        """
-
-        result = self.cli_service.send_command_list(command_list, expected_map=expected_map)
-        self.cli_service.exit_configuration_mode()
-
-        return result
-
     def add_vlan(self, vlan_range, port, port_mode, qnq=False, ctag=''):
         """ Configure specified vlan range in specified switchport mode on provided port
 
