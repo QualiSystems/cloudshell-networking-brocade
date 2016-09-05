@@ -57,6 +57,17 @@ class BrocadeStateOperations(StateOperations):
         if self.session.session_type.lower() != 'console':
             self._wait_for_session_restore(self.session)
 
+    def boot_from_secondary(self):
+        expected_map = {"(enter 'y' or 'n')": lambda session: session.send_line('y')}
+        try:
+            self.logger.info("Send 'boot system flash secondary' to device...")
+            self.cli_service.send_command(command='boot system flash secondary', expected_map=expected_map, timeout=3)
+        except Exception as e:
+            self.logger.info('Session type is \'{}\', closing session...'.format(self.session.session_type))
+
+        if self.session.session_type.lower() != 'console':
+            self._wait_for_session_restore(self.session)
+
     def _wait_for_session_restore(self, session):
         """ Wait for restore session connection """
 

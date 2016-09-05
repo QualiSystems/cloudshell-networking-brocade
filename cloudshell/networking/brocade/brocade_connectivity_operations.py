@@ -108,6 +108,9 @@ class BrocadeConnectivityOperations(ConnectivityOperations):
 
         if not port:
             raise Exception(self.__class__.__name__, "Port can't be empty")
+        if port_mode not in ["access", "trunk"]:
+            raise Exception(self.__class__.__name__,
+                            "Unsupported port mode '{}'. Should be 'trunk' or 'access'".format(port_mode))
         if vlan_range == "" and port_mode == "access":
             raise Exception(self.__class__.__name__, "Switchport type is Access, but vlan id/range is empty")
         if ("," in vlan_range or "-" in vlan_range) and port_mode == "access":
@@ -173,7 +176,7 @@ class BrocadeConnectivityOperations(ConnectivityOperations):
             raise Exception(self.__class__.__name__, err_msg)
 
         port_name = temp_port_full_name.split('/')[-1]
-        matched = re.search(r"(?P<name>\w+)(?P<id>\d+(/\d+)*)", port_name)
+        matched = re.search(r"(?P<name>\w+)(?P<id>\d+(/\d+)*)", port_name.replace("-", "/"))
         if matched:
             port_name = "{port} {id}".format(port=matched.groupdict()["name"], id=matched.groupdict()["id"])
 

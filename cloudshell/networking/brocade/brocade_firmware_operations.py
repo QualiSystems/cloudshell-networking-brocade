@@ -16,12 +16,13 @@ from cloudshell.shell.core.config_utils import override_attributes_from_config
 class BrocadeFirmwareOperations(FirmwareOperationsInterface):
     DEFAULT_PROMPT = r'[>$#]\s*$'
 
-    def __init__(self, context=None, api=None, cli_service=None, logger=None):
+    def __init__(self, context=None, api=None, cli_service=None, logger=None, config=None):
         self._context = context
         self._api = api
         self._cli_service = cli_service
         self._logger = logger
-        overridden_config = override_attributes_from_config(BrocadeFirmwareOperations)
+        self._config = config
+        overridden_config = override_attributes_from_config(BrocadeFirmwareOperations, config=self._config)
         self._default_prompt = overridden_config.DEFAULT_PROMPT
 
     @property
@@ -77,10 +78,9 @@ class BrocadeFirmwareOperations(FirmwareOperationsInterface):
         if re.search(r"TFTP.*done", output):
             self.logger.debug("Copy new image to flash secondary successfully")
             self.logger.debug("Try boot device from secondary flash ...")
-            self.cli_service.send_command(command="boot system flash secondary", expected_str=expected_map)
-            self.state_operations.reload()
-            self.logger.debug("Boot from secondary flash successfully. Copy Secondary to primary ...")
-            self.cli_service.send_command(command="copy flash flash primary delete-first", expected_str=expected_map)
+            self.state_operations.boot_from_secondary()
+            self.logger.debug("Boot from secondary flash successfully. Copy Secondary to Primary ...")
+            self.cli_service.send_command(command="copy flash flash primary delete-first", expected_map=expected_map)
             return "Update firmware completed successfully"
         else:
             matched = re.match(r"TFTP:.*", output)
