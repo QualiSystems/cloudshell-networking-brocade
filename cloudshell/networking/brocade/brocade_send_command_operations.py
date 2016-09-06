@@ -5,10 +5,10 @@ import inject
 
 from cloudshell.configuration.cloudshell_cli_binding_keys import CLI_SERVICE
 from cloudshell.configuration.cloudshell_shell_core_binding_keys import LOGGER, CONTEXT, API
-from cloudshell.networking.operations.interfaces.send_command_interface import SendCommandInterface
+from cloudshell.networking.operations.interfaces.run_command_interface import RunCommandInterface
 
 
-class BrocadeSendCommandOperations(SendCommandInterface):
+class BrocadeSendCommandOperations(RunCommandInterface):
     def __init__(self, context=None, api=None, cli_service=None, logger=None):
         self._context = context
         self._api = api
@@ -31,8 +31,8 @@ class BrocadeSendCommandOperations(SendCommandInterface):
     def api(self):
         return self._api or inject.instance(API)
 
-    def send_command(self, command):
+    def run_custom_command(self, command):
         return self.cli_service.send_command(command=command)
 
-    def send_config_command(self, command):
+    def run_custom_config_command(self, command):
         return self.cli_service.send_config_command(command=command)

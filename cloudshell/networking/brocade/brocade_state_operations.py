@@ -60,7 +60,10 @@ class BrocadeStateOperations(StateOperations):
         expected_map = {"(enter 'y' or 'n')": lambda session: session.send_line('y')}
         try:
             self.logger.info("Send 'reload' to device...")
-            self.cli.send_command(command='reload', expected_map=expected_map, timeout=3)
+            self.cli.send_command(command='reload',
+                                  expected_str="Halt and reboot",
+                                  expected_map=expected_map,
+                                  timeout=3)
         except Exception as e:
             self.logger.info('Session type is \'{}\', closing session...'.format(self.session.session_type))
 

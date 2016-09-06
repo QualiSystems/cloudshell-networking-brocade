@@ -54,7 +54,7 @@ class BrocadeConfigurationOperations(ConfigurationOperations):
 
     @property
     def resource_name(self):
-        return get_resource_name()
+        return get_resource_name().replace(" ", "_")
 
     def restore(self, source_file, config_type, restore_method='override', vrf=None):
         """ General method for restore configuration on Brocade devices """
