@@ -8,6 +8,7 @@ from cloudshell.configuration.cloudshell_cli_binding_keys import CLI_SERVICE, SE
 from cloudshell.configuration.cloudshell_shell_core_binding_keys import LOGGER, API
 from cloudshell.networking.operations.state_operations import StateOperations
 from cloudshell.shell.core.config_utils import override_attributes_from_config
+from cloudshell.shell.core.context_utils import get_resource_name
 
 
 class BrocadeStateOperations(StateOperations):
@@ -29,7 +30,7 @@ class BrocadeStateOperations(StateOperations):
         return self._logger or inject.instance(LOGGER)
 
     @property
-    def cli_service(self):
+    def cli(self):
         return self._cli_service or inject.instance(CLI_SERVICE)
 
     @property
@@ -39,6 +40,15 @@ class BrocadeStateOperations(StateOperations):
     @property
     def session(self):
         return inject.instance(SESSION)
+
+    @property
+    def resource_name(self):
+        if self._resource_name is None:
+            try:
+                self._resource_name = get_resource_name()
+            except:
+                raise Exception(self.__class__.__name__, 'Failed to get api handler.')
+        return self._resource_name
 
     def shutdown(self):
         """ Shutdown device """
@@ -50,7 +60,7 @@ class BrocadeStateOperations(StateOperations):
         expected_map = {"(enter 'y' or 'n')": lambda session: session.send_line('y')}
         try:
             self.logger.info("Send 'reload' to device...")
-            self.cli_service.send_command(command='reload', expected_map=expected_map, timeout=3)
+            self.cli.send_command(command='reload', expected_map=expected_map, timeout=3)
         except Exception as e:
             self.logger.info('Session type is \'{}\', closing session...'.format(self.session.session_type))
 
@@ -61,7 +71,7 @@ class BrocadeStateOperations(StateOperations):
         expected_map = {"(enter 'y' or 'n')": lambda session: session.send_line('y')}
         try:
             self.logger.info("Send 'boot system flash secondary' to device...")
-            self.cli_service.send_command(command='boot system flash secondary', expected_map=expected_map, timeout=3)
+            self.cli.send_command(command='boot system flash secondary', expected_map=expected_map, timeout=3)
         except Exception as e:
             self.logger.info('Session type is \'{}\', closing session...'.format(self.session.session_type))
 
@@ -87,7 +97,7 @@ class BrocadeStateOperations(StateOperations):
         reboot_time = time.time()
         while True:
             if time.time() - reboot_time > self._session_wait_timeout:
-                self.cli_service.destroy_threaded_session(session=session)
+                self.cli.destroy_threaded_session(session=session)
                 raise Exception(self.__class__.__name__,
                                 'Session cannot connect after {} sec.'.format(self._session_wait_timeout))
             try:
