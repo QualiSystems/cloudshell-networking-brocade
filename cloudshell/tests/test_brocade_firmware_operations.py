@@ -17,8 +17,8 @@ class TestFirmwareOperationsInterface(TestCase):
         self._firmware_operations_instance = BrocadeFirmwareOperations(context=self._context,
                                                                        api=self._api,
                                                                        cli_service=self._cli_service,
-                                                                       logger=self._logger,
-                                                                       config=self._config)
+                                                                       logger=self._logger
+                                                                       )
 
     def test_load_firmware_copy_image_failed(self):
         self._cli_service.send_command = Mock(return_value="")
