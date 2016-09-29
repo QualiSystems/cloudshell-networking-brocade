@@ -56,10 +56,10 @@ class BrocadeConfigurationOperations(ConfigurationOperations):
     def resource_name(self):
         return get_resource_name().replace(" ", "_")
 
-    def restore(self, source_file, config_type, restore_method='override', vrf=None):
+    def restore(self, path, configuration_type, restore_method, vrf_management_name=None):
         """ General method for restore configuration on Brocade devices """
         pass
 
-    def save(self, destination_host, source_filename, vrf=None):
+    def save(self, folder_path, configuration_type, vrf_management_name=None):
         """ General method for save configuration on Brocade devices """
         pass
