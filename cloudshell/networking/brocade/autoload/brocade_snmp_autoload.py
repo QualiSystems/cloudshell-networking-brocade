@@ -28,7 +28,7 @@ class BrocadeSnmpAutoload(AutoloadOperationsInterface):
         self._disable_snmp = False
         self.snmp_community = snmp_community
         if not self.snmp_community:
-            self.snmp_community = get_attribute_by_name("SNMP Read Community") or "quali"
+            self.snmp_community = get_attribute_by_name("SNMP Read Community")
         self._cli_service = cli_service
 
     @property
@@ -63,9 +63,11 @@ class BrocadeSnmpAutoload(AutoloadOperationsInterface):
         if snmp_status:
             snmp_status = snmp_status.group("status")
 
-        snmp_ro_community = re.search(r"Community\(ro\):\s*(?P<snmp_ro_community>\w+)\n", snmp_data)
+        snmp_ro_community = re.search(r"Community\(ro\):\s*(?P<snmp_ro_community>.+)\n", snmp_data)
         if snmp_ro_community:
             snmp_ro_community = snmp_ro_community.group("snmp_ro_community")
+        else:
+            snmp_ro_community = ""
 
         if "disabled" in snmp_status.lower():
             self.cli_service.send_config_command("snmp-server")
@@ -85,6 +87,9 @@ class BrocadeSnmpAutoload(AutoloadOperationsInterface):
         :return: AutoLoadDetails object or Exception
         """
 
+        if not self.snmp_community:
+            raise Exception(self.__class__.__name__, "SNMP Read Community shouldn't be empty")
+
         try:
             self._enable_snmp = (get_attribute_by_name('Enable SNMP') or 'true').lower() == 'true'
             self._disable_snmp = (get_attribute_by_name('Disable SNMP') or 'false').lower() == 'true'
@@ -97,8 +102,8 @@ class BrocadeSnmpAutoload(AutoloadOperationsInterface):
         try:
             return self._get_autoload_details()
         except Exception as e:
-            self.logger.error('Autoload failed: {0}'.format(e.message))
-            raise Exception(self.__class__.__name__, e.message)
+            self.logger.error('Autoload failed: {0}'.format(e))
+            raise Exception(self.__class__.__name__, e)
         finally:
             if self._disable_snmp:
                 self.disable_snmp()
