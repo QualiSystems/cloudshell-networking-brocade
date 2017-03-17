@@ -47,6 +47,7 @@ class SystemActions(object):
                                          error_map=error_map).execute_command(scheme=protocol,
                                                                               host=host,
                                                                               file_path=file_path)
+        output = self._buffer_readup(output=output)
 
         if re.search(r"TFTP.*done", output):
             self._logger.debug("Copy new image to flash secondary successfully")
@@ -68,6 +69,9 @@ class SystemActions(object):
                                              command_template=system_commands.COMMIT_FIRMWARE,
                                              action_map=action_map,
                                              error_map=error_map).execute_command()
+
+            output = self._buffer_readup(output=output)
+
             if not re.search(r"Done", output, re.IGNORECASE):
                 raise Exception(self.__class__.__name__, "Load firmware failed during copy from secondary to primary")
 
@@ -79,6 +83,11 @@ class SystemActions(object):
             else:
                 error = "Error during copy firmware image"
             raise Exception(self.__class__.__name__, "Load firmware failed with error: {}".format(error))
+
+    def _buffer_readup(self, output):
+        """ Read buffer to end of command execution if prompt returned immediately """
+
+        return output
 
     def shutdown(self, action_map=None, error_mapp=None):
         """ Shutdown the system """

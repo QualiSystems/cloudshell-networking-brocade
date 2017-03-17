@@ -7,9 +7,8 @@ from cloudshell.networking.brocade.command_actions.iface_actions import IFaceAct
 
 
 class BrocadeAddVlanFlow(AddVlanFlow):
-    def __init__(self, cli_handler, logger, does_require_single_switchport_cmd=False):
+    def __init__(self, cli_handler, logger):
         super(BrocadeAddVlanFlow, self).__init__(cli_handler, logger)
-        self._does_require_single_switchport_cmd = does_require_single_switchport_cmd
 
     def execute_flow(self, vlan_range, port_mode, port_name, qnq, c_tag):
         """ Configures VLANs on multiple ports or port-channels

@@ -7,6 +7,8 @@ from cloudshell.networking.brocade.command_actions.system_actions import SystemA
 
 
 class BrocadeLoadFirmwareFlow(LoadFirmwareFlow):
+    SYSTEM_ACTIONS_CLASS = SystemActions
+
     def __init__(self, cli_handler, logger):
         super(BrocadeLoadFirmwareFlow, self).__init__(cli_handler, logger)
 
@@ -31,7 +33,7 @@ class BrocadeLoadFirmwareFlow(LoadFirmwareFlow):
             file_path = connection_dict.get(UrlParser.PATH) + "/" + connection_dict.get(UrlParser.FILENAME)
 
         with self._cli_handler.get_cli_service(self._cli_handler.enable_mode) as enable_session:
-            system_action = SystemActions(enable_session, self._logger)
+            system_action = self.SYSTEM_ACTIONS_CLASS(enable_session, self._logger)
 
             try:
                 return system_action.load_firmware(protocol=connection_dict.get(UrlParser.SCHEME),

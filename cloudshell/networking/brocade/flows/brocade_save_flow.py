@@ -7,6 +7,8 @@ from cloudshell.networking.brocade.command_actions.save_restore_actions import S
 
 
 class BrocadeSaveFlow(SaveConfigurationFlow):
+    SAVE_RESTORE_ACTIONS_CLASS = SaveRestoreActions
+
     def __init__(self, cli_handler, logger):
         super(BrocadeSaveFlow, self).__init__(cli_handler, logger)
 
@@ -36,7 +38,7 @@ class BrocadeSaveFlow(SaveConfigurationFlow):
             file_path = connection_dict.get(UrlParser.PATH) + "/" + connection_dict.get(UrlParser.FILENAME)
 
         with self._cli_handler.get_cli_service(self._cli_handler.enable_mode) as enable_session:
-            save_action = SaveRestoreActions(enable_session, self._logger)
+            save_action = self.SAVE_RESTORE_ACTIONS_CLASS(enable_session, self._logger)
 
             save_action.save(config=configuration_type,
                              protocol=connection_dict.get(UrlParser.SCHEME),
