@@ -8,6 +8,8 @@ from cloudshell.networking.brocade.command_actions.system_actions import SystemA
 
 
 class BrocadeRestoreFlow(RestoreConfigurationFlow):
+    SAVE_RESTORE_ACTIONS_CLASS = SaveRestoreActions
+
     def __init__(self, cli_handler, logger):
         super(BrocadeRestoreFlow, self).__init__(cli_handler, logger)
 
@@ -54,7 +56,7 @@ class BrocadeRestoreFlow(RestoreConfigurationFlow):
                 configuration_type = "startup-config"
 
         with self._cli_handler.get_cli_service(self._cli_handler.enable_mode) as enable_session:
-            restore_action = SaveRestoreActions(enable_session, self._logger)
+            restore_action = self.SAVE_RESTORE_ACTIONS_CLASS(enable_session, self._logger)
             system_action = SystemActions(enable_session, self._logger)
 
             restore_action.restore(config=configuration_type,

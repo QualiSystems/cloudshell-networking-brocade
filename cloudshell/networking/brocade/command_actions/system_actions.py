@@ -9,6 +9,7 @@ from cloudshell.networking.brocade.command_templates import system_commands
 
 class SystemActions(object):
     SESSION_RECONNECT_TIMEOUT = 180
+    SAVE_RESTORE_PROMPT = r"[Dd]one|[Ee]rror|[Ff]ailed"
 
     def __init__(self, cli_service, logger):
         """ Reboot actions
@@ -43,11 +44,12 @@ class SystemActions(object):
 
         output = CommandTemplateExecutor(cli_service=self._cli_service,
                                          command_template=system_commands.COPY_TO_SECONDARY,
+                                         expected_string=self.SAVE_RESTORE_PROMPT,
                                          action_map=action_map,
                                          error_map=error_map).execute_command(scheme=protocol,
                                                                               host=host,
                                                                               file_path=file_path)
-        output = self._buffer_readup(output=output)
+        self._cli_service.send_command("")
 
         if re.search(r"TFTP.*done", output):
             self._logger.debug("Copy new image to flash secondary successfully")
@@ -67,10 +69,11 @@ class SystemActions(object):
 
             output = CommandTemplateExecutor(cli_service=self._cli_service,
                                              command_template=system_commands.COMMIT_FIRMWARE,
+                                             expected_string=self.SAVE_RESTORE_PROMPT,
                                              action_map=action_map,
                                              error_map=error_map).execute_command()
 
-            output = self._buffer_readup(output=output)
+            self._cli_service.send_command("")
 
             if not re.search(r"Done", output, re.IGNORECASE):
                 raise Exception(self.__class__.__name__, "Load firmware failed during copy from secondary to primary")
@@ -84,12 +87,7 @@ class SystemActions(object):
                 error = "Error during copy firmware image"
             raise Exception(self.__class__.__name__, "Load firmware failed with error: {}".format(error))
 
-    def _buffer_readup(self, output):
-        """ Read buffer to end of command execution if prompt returned immediately """
-
-        return output
-
-    def shutdown(self, action_map=None, error_mapp=None):
+    def shutdown(self, action_map=None, error_map=None):
         """ Shutdown the system """
 
         pass

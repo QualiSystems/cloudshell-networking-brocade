@@ -36,7 +36,7 @@ class SaveRestoreActions(object):
         output = CommandTemplateExecutor(self._cli_service, save_restore.SAVE,
                                          action_map=action_map,
                                          error_map=error_map).execute_command(config=config,
-                                                                              scheme=protocol,
+                                                                              protocol=protocol,
                                                                               host=host,
                                                                               file_path=file_path)
 
@@ -65,7 +65,7 @@ class SaveRestoreActions(object):
             output = CommandTemplateExecutor(self._cli_service, save_restore.RESTORE,
                                              action_map=action_map,
                                              error_map=error_map).execute_command(config=config,
-                                                                                  scheme=protocol,
+                                                                                  protocol=protocol,
                                                                                   host=host,
                                                                                   file_path=file_path,
                                                                                   overwrite="")
@@ -73,7 +73,7 @@ class SaveRestoreActions(object):
             output = CommandTemplateExecutor(self._cli_service, save_restore.RESTORE,
                                              action_map=action_map,
                                              error_map=error_map).execute_command(config=config,
-                                                                                  scheme=protocol,
+                                                                                  protocol=protocol,
                                                                                   host=host,
                                                                                   file_path=file_path)
 
