@@ -51,7 +51,7 @@ class SystemActions(object):
                                                                               file_path=file_path)
         self._cli_service.send_command("")
 
-        if re.search(r"TFTP.*done", output):
+        if re.search(r"TFTP.*[Dd]one", output):
             self._logger.debug("Copy new image to flash secondary successfully")
             self._logger.debug("Try boot device from secondary flash ...")
             try:
