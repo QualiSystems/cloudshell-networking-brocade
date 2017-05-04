@@ -10,8 +10,7 @@ from cloudshell.snmp.snmp_parameters import SNMPV2Parameters
 
 class BrocadeEnableSnmpFlow(EnableSnmpFlow):
     def __init__(self, cli_handler, logger):
-        """
-        Enable snmp flow
+        """ Enable snmp flow
         :param cli_handler:
         :param logger:
         :return:
@@ -35,13 +34,13 @@ class BrocadeEnableSnmpFlow(EnableSnmpFlow):
         with self._cli_handler.get_cli_service(self._cli_handler.config_mode) as session:
             snmp_actions = EnableDisableSnmpActions(session, self._logger)
 
-            currnet_snmp_info = snmp_actions.get_current_snmp_info()
+            current_snmp_info = snmp_actions.get_current_snmp_info()
 
-            snmp_status = re.search(r"Status:\s*(?P<status>\w+)\n", currnet_snmp_info)
+            snmp_status = re.search(r"Status:\s*(?P<status>\w+)\n", current_snmp_info)
             if snmp_status:
                 snmp_status = snmp_status.group("status")
 
-            current_snmp_ro_community = re.search(r"Community\(ro\):\s*(?P<snmp_ro_community>.+)\n", currnet_snmp_info)
+            current_snmp_ro_community = re.search(r"Community\(ro\):\s*(?P<snmp_ro_community>.+)\n", current_snmp_info)
             if current_snmp_ro_community:
                 current_snmp_ro_community = current_snmp_ro_community.group("snmp_ro_community")
 

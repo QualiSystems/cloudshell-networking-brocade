@@ -13,7 +13,7 @@ class BrocadeRestoreFlow(RestoreConfigurationFlow):
     def __init__(self, cli_handler, logger):
         super(BrocadeRestoreFlow, self).__init__(cli_handler, logger)
 
-    def execute_flow(self, path, configuration_type, restore_method, vrf_management_name):
+    def execute_flow(self, path, configuration_type, restore_method, vrf_management_name=None):
         """ Execute flow which save selected file to the provided destination
 
         :param path: the path to the configuration file, including the configuration file name
