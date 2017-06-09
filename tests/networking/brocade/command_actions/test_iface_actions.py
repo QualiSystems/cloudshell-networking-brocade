@@ -33,4 +33,4 @@ class TestIFaceActions(unittest.TestCase):
     def test_get_port_name_portname(self):
         """ Successfully return port name """
 
-        self.assertEqual(self.tested_instance.get_port_name("CH1/M1/Ethernet-4"), "Ethernet/4")
+        self.assertEqual(self.tested_instance.get_port_name("CH1/M1/Ethernet-4"), "Ethernet-4")
