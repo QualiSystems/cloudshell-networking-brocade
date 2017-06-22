@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os
 import mock
 import unittest
 
@@ -207,30 +206,136 @@ class TestBrocadeGenericSNMPAutoload(unittest.TestCase):
 
         pass
 
-    def test__get_ipv4_interface_address(self):
-        """  """
+    def test__get_ipv4_interface_address_success(self):
+        """ Successfully return ipv4 address """
 
-        pass
+        port_index = 2
+        self.tested_instance.ip_v4_table = {"ipv4_address_1": {"ipAdEntIfIndex": "1"},
+                                            "ipv4_address_2": {"ipAdEntIfIndex": "2"}}
 
-    def test__get_ipv6_interface_address(self):
-        """  """
+        self.assertEqual(self.tested_instance._get_ipv4_interface_address(port_index), "ipv4_address_2")
 
-        pass
+    def test__get_ipv4_interface_address_fail(self):
+        """ Failed to determine ipv4 address. Return None """
 
-    def test__get_port_duplex(self):
-        """  """
+        port_index = 3
+        self.tested_instance.ip_v4_table = {"ipv4_address_1": {"ipAdEntIfIndex": "1"},
+                                            "ipv4_address_2": {"ipAdEntIfIndex": "2"}}
 
-        pass
+        self.assertEqual(self.tested_instance._get_ipv4_interface_address(port_index), None)
 
-    def test__get_port_autoneg(self):
-        """  """
+    def test__get_ipv6_interface_address_success(self):
+        """ Successfully return IPv6 address """
 
-        pass
+        port_index = 2
+        self.tested_instance.ip_v6_table = {"ipv6_address_1": {"ipAdEntIfIndex": "1"},
+                                            "ipv6_address_2": {"ipAdEntIfIndex": "2"}}
 
-    def test__get_adjacent(self):
-        """  """
+        self.assertEqual(self.tested_instance._get_ipv6_interface_address(port_index), "ipv6_address_2")
 
-        pass
+    def test__get_ipv6_interface_address_fail(self):
+        """ Failed to determine IPv6 address. Return None """
+
+        port_index = 3
+        self.tested_instance.ip_v6_table = {"ipv6_address_1": {"ipAdEntIfIndex": "1"},
+                                            "ipv6_address_2": {"ipAdEntIfIndex": "2"}}
+
+        self.assertEqual(self.tested_instance._get_ipv6_interface_address(port_index), None)
+
+    def test__get_port_duplex_full(self):
+        """ Successfully determined duplex mode. Return Full """
+
+        self.tested_instance.duplex_table = {"index": {"dot3StatsIndex": "port_index"}}
+        self.snmp_handler.get_property.return_value = "fullDuplex"
+
+        self.assertEqual(self.tested_instance._get_port_duplex("port_index"), "Full")
+
+    def test__get_port_duplex_half_1(self):
+        """ Successfully determined duplex mode. Return Half """
+
+        self.tested_instance.duplex_table = {"index": {"dot3StatsIndex": "port_index"}}
+        self.snmp_handler.get_property.side_effect = ["halfDuplex", "empty", "unknown"]
+
+        self.assertEqual(self.tested_instance._get_port_duplex("port_index"), "Half")
+        self.assertEqual(self.tested_instance._get_port_duplex("port_index"), "Half")
+        self.assertEqual(self.tested_instance._get_port_duplex("port_index"), "Half")
+
+    def test__get_port_duplex_half_2(self):
+        """ Failed to determine port duplex mode """
+
+        self.tested_instance.duplex_table = {"index_1": {"suffix": "port_index"},
+                                             "index_2": {"dot3StatsIndex": "another_port_index"}}
+
+        self.assertEqual(self.tested_instance._get_port_duplex("port_index"), "Half")
+
+    def test__get_port_autoneg_enabled(self):
+        """ Successfully check state. Auto negotiation Enabled. Return status True """
+
+        autoneg_status_response = {"port_index": "Autonegotiation Enabled"}
+        self.snmp_handler.get = mock.MagicMock(return_value=autoneg_status_response)
+        self.assertEqual(self.tested_instance._get_port_autoneg("port_index"), "True")
+
+    def test__get_port_autoneg_disabled(self):
+        """ Successfully check state. Auto negotiation Not Enabled (Unknown, Disabled etc). Return status False """
+
+        autoneg_status_response = {"port_index": "Some autonegotiation status"}
+        self.snmp_handler.get = mock.MagicMock(return_value=autoneg_status_response)
+        self.assertEqual(self.tested_instance._get_port_autoneg("port_index"), "False")
+
+    def test__get_port_autoneg_failed(self):
+        """ Failed to check state. Return status False """
+
+        self.snmp_handler.get = mock.MagicMock(side_effect=[Exception])
+        self.assertEqual(self.tested_instance._get_port_autoneg("port_index"), "False")
+
+    def test__get_adjacent_fail_empty_lldp(self):
+        """ Failed to determine port adjacent. LLDP Table is empty """
+
+        self.tested_instance.lldp_local_table = {}
+
+        self.assertEqual(self.tested_instance._get_adjacent("interface_id"), "")
+
+    def test__get_adjacent_fail_no_ifname(self):
+        """ Failed to determine port adjacent. Can't determine interface name """
+
+        self.tested_instance.lldp_local_table = {"iface_name_1": {"lldpLocPortDesc": "description"}}
+
+        self.tested_instance.if_table = {"iface_id_1": {self.tested_instance.IF_ENTITY: ""}}
+
+        self.assertEqual(self.tested_instance._get_adjacent("iface_id_1"), "")
+
+    def test__get_adjacent_fail_ifname_not_in_lldp(self):
+        """ Failed to determine port adjacent. LLDP Table doesn't content information about specified Interface name """
+
+        self.tested_instance.lldp_local_table = {"iface_name": {"lldpLocPortDesc": "description"}}
+        self.tested_instance.if_table = {"iface_id_1": {self.tested_instance.IF_ENTITY: "iface_name_1"}}
+
+        self.assertEqual(self.tested_instance._get_adjacent("iface_id_1"), "")
+
+    # def test__get_adjacent_fail_ifname_not_in_lldp(self):
+    #     """ Failed to determine port adjacent. Can't determine interface name """
+    #
+    #     self.tested_instance.lldp_local_table = {"iface_name_1": {"lldpLocPortDesc": "description"}}
+    #     self.tested_instance.lldp_remote_table = {"iface_name_1": {"lldpLocPortDesc": "description"}}
+    #     self.tested_instance.if_table = {"iface_id_1": {self.tested_instance.IF_ENTITY: "iface_name_1"}}
+    #
+    #     self.assertEqual(self.tested_instance._get_adjacent("iface_id_1"), "")
+
+    # def test__get_adjacent_fail_cant_determine_remote_port_info(self):
+    #     """ Failed to determine port adjacent. Can't determine remote port information from LLDP table """
+    #
+    #     self.tested_instance.lldp_local_table = {"iface_name_1": {"lldpLocPortDesc": "description"}}
+    #     self.tested_instance.if_table = {"iface_id_1": {self.tested_instance.IF_ENTITY: "iface_name_1"}}
+    #
+    #     self.assertEqual(self.tested_instance._get_adjacent("iface_id_1"), "")
+
+    # def test__get_adjacent_success(self):
+    #     """ Successfully determined port adjacent """
+    #
+    #     self.tested_instance.lldp_local_table = {"iface_name": {"lldpLocPortDesc": "description"}}
+    #     self.tested_instance.if_table = {"iface_id_1": {self.tested_instance.IF_ENTITY: "iface_name_1"}}
+    #
+    #     self.assertEqual(self.tested_instance._get_adjacent("iface_id_1"), "")
 
     def test__get_mapping(self):
         """  """

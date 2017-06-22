@@ -633,10 +633,9 @@ class BrocadeGenericSNMPAutoload(object):
         :return : IPv4 address
         """
 
-        if self.ip_v4_table and len(self.ip_v4_table) > 1:
-            for key, value in self.ip_v4_table.iteritems():
-                if "ipAdEntIfIndex" in value and int(value["ipAdEntIfIndex"]) == port_index:
-                    return key
+        for key, value in self.ip_v4_table.iteritems():
+            if "ipAdEntIfIndex" in value and int(value["ipAdEntIfIndex"]) == port_index:
+                return key
 
     def _get_ipv6_interface_address(self, port_index):
         """ Get IPv6 address details for provided port
@@ -645,10 +644,9 @@ class BrocadeGenericSNMPAutoload(object):
         :return : IPv6 address
         """
 
-        if self.ip_v6_table and len(self.ip_v6_table) > 1:
-            for key, value in self.ip_v6_table.iteritems():
-                if "ipAdEntIfIndex" in value and int(value["ipAdEntIfIndex"]) == port_index:
-                    return key
+        for key, value in self.ip_v6_table.iteritems():
+            if "ipAdEntIfIndex" in value and int(value["ipAdEntIfIndex"]) == port_index:
+                return key
 
     def _get_port_duplex(self, port_index):
         """ Get interface mode
@@ -659,7 +657,7 @@ class BrocadeGenericSNMPAutoload(object):
         """
 
         for key, value in self.duplex_table.iteritems():
-            if "dot3StatsIndex" in value.keys() and value["dot3StatsIndex"] == str(port_index):
+            if "dot3StatsIndex" in value and value["dot3StatsIndex"] == str(port_index):
                 interface_duplex = self.snmp_handler.get_property("EtherLike-MIB", "dot3StatsDuplexStatus", key)
                 if "fullDuplex" in interface_duplex:
                     return "Full"
@@ -673,13 +671,15 @@ class BrocadeGenericSNMPAutoload(object):
         :rtype string
         """
 
+        result = "False"
         try:
             auto_negotiation = self.snmp_handler.get(("MAU-MIB", "ifMauAutoNegAdminStatus", port_index, 1)).values()[0]
             if "enabled" in auto_negotiation.lower():
-                return "True"
+                result = "True"
         except Exception as e:
             self.logger.error("Failed to load auto negotiation property for interface {0}".format(e.message))
-            return "False"
+        finally:
+            return result
 
     def _get_adjacent(self, interface_id):
         """ Get interface adjacent
@@ -697,11 +697,11 @@ class BrocadeGenericSNMPAutoload(object):
                 if key:
                     for port_id, rem_table in self.lldp_remote_table.iteritems():
                         if ".{0}.".format(key) in port_id:
-                            remoute_sys_name = rem_table.get("lldpRemSysName", "")
-                            remoute_port_name = self.snmp_handler.get_property("LLDP-MIB", "lldpRemPortDesc", port_id)
-                            if remoute_port_name and remoute_sys_name:
-                                result = "{remote_host} through {remote_port}".format(remote_host=remoute_sys_name,
-                                                                                      remote_port=remoute_port_name)
+                            remote_sys_name = rem_table.get("lldpRemSysName", "")
+                            remote_port_name = self.snmp_handler.get_property("LLDP-MIB", "lldpRemPortDesc", port_id)
+                            if remote_port_name and remote_sys_name:
+                                result = "{remote_host} through {remote_port}".format(remote_host=remote_sys_name,
+                                                                                      remote_port=remote_port_name)
                                 break
         return result
 

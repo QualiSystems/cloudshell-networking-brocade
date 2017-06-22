@@ -3,7 +3,7 @@
 
 from cloudshell.devices.flows.cli_action_flows import DisableSnmpFlow
 from cloudshell.networking.brocade.command_actions.enable_disable_snmp_actions import EnableDisableSnmpActions
-from cloudshell.snmp.snmp_parameters import SNMPV2Parameters
+from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
 
 
 class BrocadeDisableSnmpFlow(DisableSnmpFlow):
@@ -21,7 +21,7 @@ class BrocadeDisableSnmpFlow(DisableSnmpFlow):
     def execute_flow(self, snmp_parameters=None):
         """ Disable SNMP Read Community """
 
-        if isinstance(snmp_parameters, SNMPV2Parameters) and snmp_parameters.snmp_community:
+        if isinstance(snmp_parameters, SNMPV2ReadParameters) and snmp_parameters.snmp_community:
             with self._cli_handler.config_mode_service() as session:
                 snmp_actions = EnableDisableSnmpActions(session, self._logger)
                 self._logger.debug("Start Disable SNMP")

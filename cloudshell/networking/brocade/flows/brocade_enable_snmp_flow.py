@@ -5,7 +5,7 @@ import re
 
 from cloudshell.devices.flows.cli_action_flows import EnableSnmpFlow
 from cloudshell.networking.brocade.command_actions.enable_disable_snmp_actions import EnableDisableSnmpActions
-from cloudshell.snmp.snmp_parameters import SNMPV2Parameters
+from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
 
 
 class BrocadeEnableSnmpFlow(EnableSnmpFlow):
@@ -19,7 +19,7 @@ class BrocadeEnableSnmpFlow(EnableSnmpFlow):
         self._cli_handler = cli_handler
 
     def execute_flow(self, snmp_parameters):
-        if not isinstance(snmp_parameters, SNMPV2Parameters):
+        if not isinstance(snmp_parameters, SNMPV2ReadParameters):
             message = 'Unsupported SNMP version'
             self._logger.error(message)
             raise Exception(self.__class__.__name__, message)
