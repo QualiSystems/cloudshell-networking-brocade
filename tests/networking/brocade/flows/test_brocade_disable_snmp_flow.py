@@ -5,7 +5,7 @@ import mock
 import unittest
 
 from cloudshell.networking.brocade.flows.brocade_disable_snmp_flow import BrocadeDisableSnmpFlow
-from cloudshell.snmp.snmp_parameters import SNMPV2Parameters
+from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
 
 
 class TestDisableSnmpFlow(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestDisableSnmpFlow(unittest.TestCase):
 
         test_snmp_community = "snmp_community"
 
-        snmp_parameters = SNMPV2Parameters(ip="127.0.0.1", snmp_community=test_snmp_community)
+        snmp_parameters = SNMPV2ReadParameters(ip="127.0.0.1", snmp_read_community=test_snmp_community)
         snmp_actions = mock.MagicMock()
         snmp_actions_class.return_value = snmp_actions
 
@@ -49,7 +49,7 @@ class TestDisableSnmpFlow(unittest.TestCase):
     def test_execute_flow_skip_empty_community(self, snmp_actions_class):
         """ Disable SNMP Read Community skipped. SNMP Read Community is Empty """
 
-        snmp_parameters = SNMPV2Parameters(ip="127.0.0.1", snmp_community="")
+        snmp_parameters = SNMPV2ReadParameters(ip="127.0.0.1", snmp_read_community="")
         snmp_actions = mock.MagicMock()
         snmp_actions_class.return_value = snmp_actions
 

@@ -5,7 +5,7 @@ import mock
 import unittest
 
 from cloudshell.networking.brocade.flows.brocade_enable_snmp_flow import BrocadeEnableSnmpFlow
-from cloudshell.snmp.snmp_parameters import SNMPV2Parameters
+from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
 
 
 class TestBrocadeEnableSnmpFlow(unittest.TestCase):
@@ -30,7 +30,7 @@ class TestBrocadeEnableSnmpFlow(unittest.TestCase):
     def test_execute_flow_fail_empty_snmp_community(self):
         """ SNMP Community should not be empty """
 
-        snmp_parameters = SNMPV2Parameters(ip="127.0.0.1", snmp_community="")
+        snmp_parameters = SNMPV2ReadParameters(ip="127.0.0.1", snmp_read_community="")
 
         with self.assertRaisesRegexp(Exception, "SNMP community cannot be empty"):
             self.tested_instance.execute_flow(snmp_parameters)
@@ -41,7 +41,7 @@ class TestBrocadeEnableSnmpFlow(unittest.TestCase):
 
         test_snmp_community = "read_community"
 
-        snmp_parameters = SNMPV2Parameters(ip="127.0.0.1", snmp_community=test_snmp_community)
+        snmp_parameters = SNMPV2ReadParameters(ip="127.0.0.1", snmp_read_community=test_snmp_community)
         snmp_actions = mock.MagicMock()
         snmp_actions_class.return_value = snmp_actions
         snmp_actions.get_current_snmp_info.return_value = """ Status: Enabled
@@ -64,7 +64,7 @@ class TestBrocadeEnableSnmpFlow(unittest.TestCase):
 
         test_snmp_community = "new_read_community"
 
-        snmp_parameters = SNMPV2Parameters(ip="127.0.0.1", snmp_community=test_snmp_community)
+        snmp_parameters = SNMPV2ReadParameters(ip="127.0.0.1", snmp_read_community=test_snmp_community)
         snmp_actions = mock.MagicMock()
         snmp_actions_class.return_value = snmp_actions
         snmp_actions.get_current_snmp_info.return_value = """ Status: Enabled
@@ -79,7 +79,7 @@ class TestBrocadeEnableSnmpFlow(unittest.TestCase):
         self.tested_instance.execute_flow(snmp_parameters)
         snmp_actions.get_current_snmp_info.assert_called_once()
         snmp_actions.enable_snmp_server.assert_not_called()
-        snmp_actions.enable_snmp_community.assert_called_once_with(snmp_community=test_snmp_community)
+        snmp_actions.enable_snmp_community.assert_called_once_with(snmp_read_community=test_snmp_community)
 
     @mock.patch("cloudshell.networking.brocade.flows.brocade_enable_snmp_flow.EnableDisableSnmpActions")
     def test_execute_flow_success(self, snmp_actions_class):
@@ -87,7 +87,7 @@ class TestBrocadeEnableSnmpFlow(unittest.TestCase):
 
         test_snmp_community = "new_read_community"
 
-        snmp_parameters = SNMPV2Parameters(ip="127.0.0.1", snmp_community=test_snmp_community)
+        snmp_parameters = SNMPV2ReadParameters(ip="127.0.0.1", snmp_read_community=test_snmp_community)
         snmp_actions = mock.MagicMock()
         snmp_actions_class.return_value = snmp_actions
         snmp_actions.get_current_snmp_info.return_value = """ Status: Disabled
@@ -102,4 +102,4 @@ class TestBrocadeEnableSnmpFlow(unittest.TestCase):
         self.tested_instance.execute_flow(snmp_parameters)
         snmp_actions.get_current_snmp_info.assert_called_once()
         snmp_actions.enable_snmp_server.assert_called_once()
-        snmp_actions.enable_snmp_community.assert_called_once_with(snmp_community=test_snmp_community)
+        snmp_actions.enable_snmp_community.assert_called_once_with(snmp_read_community=test_snmp_community)
