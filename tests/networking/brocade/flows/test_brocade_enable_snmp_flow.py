@@ -54,6 +54,7 @@ class TestBrocadeEnableSnmpFlow(unittest.TestCase):
                                                           """
 
         self.tested_instance.execute_flow(snmp_parameters)
+
         snmp_actions.get_current_snmp_info.assert_called_once()
         snmp_actions.enable_snmp_server.assert_not_called()
         snmp_actions.enable_snmp_community.assert_not_called()
@@ -77,9 +78,10 @@ class TestBrocadeEnableSnmpFlow(unittest.TestCase):
                                                           """
 
         self.tested_instance.execute_flow(snmp_parameters)
+
         snmp_actions.get_current_snmp_info.assert_called_once()
         snmp_actions.enable_snmp_server.assert_not_called()
-        snmp_actions.enable_snmp_community.assert_called_once_with(snmp_read_community=test_snmp_community)
+        snmp_actions.enable_snmp_community.assert_called_once_with(snmp_community=test_snmp_community)
 
     @mock.patch("cloudshell.networking.brocade.flows.brocade_enable_snmp_flow.EnableDisableSnmpActions")
     def test_execute_flow_success(self, snmp_actions_class):
@@ -100,6 +102,7 @@ class TestBrocadeEnableSnmpFlow(unittest.TestCase):
                                                           """
 
         self.tested_instance.execute_flow(snmp_parameters)
+
         snmp_actions.get_current_snmp_info.assert_called_once()
         snmp_actions.enable_snmp_server.assert_called_once()
-        snmp_actions.enable_snmp_community.assert_called_once_with(snmp_read_community=test_snmp_community)
+        snmp_actions.enable_snmp_community.assert_called_once_with(snmp_community=test_snmp_community)
